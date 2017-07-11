@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>title</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+        crossorigin="anonymous">
+        <link rel="stylesheet" type="style/css" href="https://bootswatch.com/lumen/bootstrap.min.css" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="col-md-12" style="margin:10px 0;">
+        <div class="col-md-9">
+            <input style="width:100%;" placeholder="Nhập đường link ảnh cần lấy" type="text" id="myImg" /></div>
+        <div class="col-md-3">
+            <button class="btn btn-primary" id="btnCut">LẤY ẢNH</button>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <img id='newImg' width="100%" />
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.js" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+        <script>
+            var imagesLoaded = 0;
+            var width = 0;
+            var height = 0;
+            var img1 = new Image();
+            var img2 = new Image();
+            var myimg = "";
+
+            function loadImage(src, onload) {
+                var img = new Image();
+                img.onload = onload;
+                img.crossOrigin = "Anonymous";
+                img.src = src;
+                img.onload = onload;
+                return img;
+            }
+
+            function ProcessImage() {
+                $("body").css("cursor", "progress");
+
+                imagesLoaded += 1;
+                height = this.height;
+                width = this.width;
+                var canvas = document.createElement("canvas");
+                var ctx = canvas.getContext("2d");
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img1, 0, 0);
+
+                if (imagesLoaded === 2) {
+                    var canvas2 = document.createElement("canvas");
+                    var ctx2 = canvas2.getContext("2d");
+                    canvas2.width = width;
+                    canvas2.height = height;
+
+                    if (height < 2048) {
+                        var imageData = ctx.getImageData(1228, 838, 820, 140);
+                        var imageData2 = ctx.getImageData(0, 1303, 168, 35);
+                        ctx2.drawImage(img2, 0, 0);
+                        ctx2.putImageData(imageData, 1228, 838);
+                        ctx2.putImageData(imageData2, 0, 1303);
+                    } else {
+                        var imageData = ctx.getImageData(width - 825, 1295, 825, 140);
+                        var imageData2 = ctx.getImageData(0, 1986, 168, 35);
+                        ctx2.drawImage(img2, 0, 0);
+                        ctx2.putImageData(imageData, width - 825, 1295);
+                        ctx2.putImageData(imageData2, 0, 1986);
+                    }
+                    var dstImg = $('#newImg').get(0);
+                    var dataImg = canvas2.toDataURL("image/jpeg");
+                    dstImg.src = dataImg;
+                    $("body").css("cursor", "default");
+
+                    download(myimg, dataImg);
+                }
+            }
+
+            $(document).ready(function () {
+                $("#btnCut").on("click", function () {
+                    var str = $("#myImg").val();
+                    if (str != null || str != undefined) {
+                        const regex = /gm(\d+)/g;
+                        let m;
+                        while ((m = regex.exec(str)) !== null) {
+                            if (m.index === regex.lastIndex) {
+                                regex.lastIndex++;
+                            }
+                            m.forEach((match, groupIndex) => {
+                                myimg = `${match}`;
+                            });
+                        }
+                        img1 = loadImage('http://media.istockphoto.com/vectors/vector-id' + myimg +
+                            '?s=2048x2048', ProcessImage);
+                        img2 = loadImage('http://media.gettyimages.com/vectors/vector-id' + myimg +
+                            '?s=2048x2048', ProcessImage);
+                    }
+                });
+            });
+
+            function download(filename, content) {
+                var pom = document.createElement('a');
+
+                var png = content.split(',')[1];
+                var the_file = new Blob([window.atob(png)], {
+                    type: 'image/jpeg',
+                    encoding: 'utf-8'
+                });
+
+                var fr = new FileReader();
+                fr.onload = function (oFREvent) {
+                    var v = oFREvent.target.result.split(',')[1];
+                    v = atob(v);
+                    var good_b64 = btoa(decodeURIComponent(escape(v)));
+                    pom.setAttribute('href', "data:image/jpeg;base64," + good_b64);
+                    pom.setAttribute('download', filename);
+                    if (document.createEvent) {
+                        var event = document.createEvent('MouseEvents');
+                        event.initEvent('click', true, true);
+                        pom.dispatchEvent(event);
+                    } else {
+                        pom.click();
+                    }
+                };
+                fr.readAsDataURL(the_file);
+
+
+            };
+        </script>
+</body>
+
+</html>
